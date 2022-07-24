@@ -18,7 +18,7 @@ using namespace std;
 struct triangle
 {
 	OVec3 p[3];
-    int col;
+    OVec3 col;
 
 };
 
@@ -30,15 +30,9 @@ struct mesh
  		ifstream f(sFilename);
 		if (!f.is_open())
         {
-            std::cout<<"hi"<<sFilename;
 			return false;
 
         }
-		/*ofstream f2("model.txt");
-		if (!f2.is_open())
-			return false;*/
-
-		// Local cache of verts
 		vector<OVec3> verts;
 
 		while (!f.eof())

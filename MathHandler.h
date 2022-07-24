@@ -127,6 +127,17 @@ public:
 		m_z -= vec.m_z;
 		return *this;
 	}
+	void color_limit()
+	{
+	    if(m_x<0.01)m_x=0;
+	    if(m_y<0.01)m_y=0;
+	    if(m_z<0.01)m_z=0;
+	    if(m_x>255)m_x*=(255/10000.0f);
+	    if(m_y>255)m_y*=255/100000.0f;
+	    if(m_z>255)m_z*=255/100000.0f;
+
+
+	}
 	OVec3 operator =(const OVec3& vec)
 	{
 		m_x = vec.m_x;

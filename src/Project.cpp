@@ -79,7 +79,7 @@ bool Engine::OnUserUpdate(float fElapsedTime)
 
 
 	fTheta += fElapsedTime;
-	setTRS(OVec3(0.0f, 0.0f, 5.0f), OVec3(0,m_time,0*2.0f), OVec3(1));
+	setTRS(OVec3(0.0f, 0.0f, 5.0f), OVec3(m_deltaTime*10,m_deltaTime*5,m_deltaTime*2.0f), OVec3(1));
 	drawModel(meshRocket);
 
 
@@ -131,11 +131,11 @@ void Engine::drawModel(mesh& model)
 			//OVec3 dp2 = setIllumination(triTransformed.p[1], normal);
 			//OVec3 dp3 = setIllumination(triTransformed.p[2], normal);
 			OVec3 dp=setIllumination(centroid, normal);
-			OVec3 light(15,15,15);
-			std::cout<<dp.m_x<<"\t"<<dp.m_y<<"\t"<<dp.m_z<<"\t";
+			OVec3 light(255,255,255);
 			dp *=light;
-            std::cout<<"\n"<<dp.m_x<<"\t"<<dp.m_y<<"\t"<<dp.m_z<<"\t";
-			triProjected.col = dp.m_x;
+			dp.color_limit();
+
+            triProjected.col = OVec3(255);
 
 			// Project triangles from 3D --> 2D
 			triViewed.p[0] = matView * triTransformed.p[0];
@@ -207,10 +207,10 @@ void Engine::drawModel(mesh& model)
 			triProjected.p[2].m_x, triProjected.p[2].m_y,
 			triProjected.col);
 
-		/*DrawTriangle(triProjected.p[0].m_x, triProjected.p[0].m_y,
+		DrawTriangle(triProjected.p[0].m_x, triProjected.p[0].m_y,
 			triProjected.p[1].m_x, triProjected.p[1].m_y,
-			triProjected.p[2].m_x, triProjected.p[2].m_y,
-			PIXEL_SOLID, FG_BLACK);*/
+			triProjected.p[2].m_x, triProjected.p[2].m_y
+			, OVec3(5));
 	}
 }
 
@@ -502,7 +502,9 @@ void Engine::onKeyDown(int key)
     }
 
 	if (key == 'D')
+
     {
+		std::cout<<"hi";
 		fYaw += 2.0f * m_deltaTime;
 
     }

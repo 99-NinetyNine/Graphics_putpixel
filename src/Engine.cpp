@@ -26,15 +26,15 @@ int IOHandler::ConstructConsole(int width, int height)
 	return 1;
 }
 
-void IOHandler::Draw(int x, int y, int col)
+void IOHandler::Draw(int x, int y, OVec3 col)
 {
 	if (x >= 0 && x < m_nScreenWidth && y >= 0 && y < m_nScreenHeight)
 	{
-		putpixel(x,y+250,col);
+		putpixel(x,y+250,COLOR(int(col.m_x),int(col.m_y),int(col.m_z)));
 	}
 }
 
-void IOHandler::Fill(int x1, int y1, int x2, int y2, int col)
+void IOHandler::Fill(int x1, int y1, int x2, int y2, OVec3 col)
 {
 	Clip(x1, y1);
 	Clip(x2, y2);
@@ -52,7 +52,7 @@ void IOHandler::Clip(int& x, int& y)
 	if (y >= m_nScreenHeight) y = m_nScreenHeight;
 }
 
-void IOHandler::DrawLine(int x1, int y1, int x2, int y2, int col)
+void IOHandler::DrawLine(int x1, int y1, int x2, int y2, OVec3 col)
 {
 	int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
 	dx = x2 - x1; dy = y2 - y1;
@@ -113,14 +113,14 @@ void IOHandler::DrawLine(int x1, int y1, int x2, int y2, int col)
 
 }
 
-void IOHandler::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int col)
+void IOHandler::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col)
 {
 	DrawLine(x1, y1, x2, y2,  col);
 	DrawLine(x2, y2, x3, y3,  col);
 	DrawLine(x3, y3, x1, y1,  col);
 }
 
-void IOHandler::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, int col)
+void IOHandler::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col)
 {
 
 	auto SWAP = [](int& x, int& y) { int t = x; x = y; y = t; };
@@ -261,7 +261,7 @@ next:
 }
 
 
-void IOHandler::DrawWireFrameModel(const std::vector<std::pair<float, float>>& vecModelCoordinates, float x, float y, float r, float s, int col)
+void IOHandler::DrawWireFrameModel(const std::vector<std::pair<float, float>>& vecModelCoordinates, float x, float y, float r, float s, OVec3 col)
 {
 	// Create translated model vector of coordinate pairs
 	std::vector<std::pair<float, float>> vecTransformedCoordinates;
