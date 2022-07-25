@@ -17,10 +17,12 @@
 #include <condition_variable>
 #include "graphics.h"
 #include "../MathHandler.h"
-class IOHandler
+#include "../InputListener.h"
+
+class Engine:public InputListener
 {
 public:
-	IOHandler();
+	Engine();
 
 	int ConstructConsole(int width, int height);
     virtual void Draw(int x, int y,OVec3 col);
@@ -31,7 +33,17 @@ public:
 	void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col=OVec3(colors(4)));
 	void DrawWireFrameModel(const std::vector<std::pair<float, float>>& vecModelCoordinates, float x, float y, float r = 0.0f, float s = 1.0f, OVec3 col = 255);
 
-	~IOHandler();
+	~Engine();
+public:
+    // Inherited via InputListener
+	virtual void onKeyDown(int key) override;
+	virtual void onKeyUp(int key) override;
+	virtual void onMouseMove(const Point& mouse_pos) override;
+
+	virtual void onLeftMouseDown(const Point& mouse_pos) override;
+	virtual void onLeftMouseUp(const Point& mouse_pos) override;
+	virtual void onRightMouseDown(const Point& mouse_pos) override;
+	virtual void onRightMouseUp(const Point& mouse_pos) override;
 
 public:
 	void Start();

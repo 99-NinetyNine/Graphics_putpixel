@@ -2,7 +2,6 @@
 #define PROJECT_H
 
 //#pragma once
-#include "Engine.h"
 
 #include <iostream>
 #include <vector>
@@ -10,9 +9,10 @@
 #include <strstream>
 #include "graphics.h"
 
+#include "Engine.h"
 #include "../MathHandler.h"
 #include "../Point.h"
-#include "../InputListener.h"
+
 
 using namespace std;
 struct triangle
@@ -67,20 +67,11 @@ struct mesh
 
 };
 
-class Engine : public IOHandler,public InputListener
+class Project : public Engine
 {
 public:
-	Engine();
-public:
-    // Inherited via InputListener
-	virtual void onKeyDown(int key) override;
-	virtual void onKeyUp(int key) override;
-	virtual void onMouseMove(const Point& mouse_pos) override;
+	Project();
 
-	virtual void onLeftMouseDown(const Point& mouse_pos) override;
-	virtual void onLeftMouseUp(const Point& mouse_pos) override;
-	virtual void onRightMouseDown(const Point& mouse_pos) override;
-	virtual void onRightMouseUp(const Point& mouse_pos) override;
 
 public:
 
@@ -124,6 +115,9 @@ public:
 	bool OnUserUpdate(float fElapsedTime)override;
 
 public:
+    void onKeyDown(int key) override;
+
+public:
 
 	int Triangle_ClipAgainstPlane(OVec3 plane_p, OVec3 plane_n, triangle& in_tri, triangle& out_tri1, triangle& out_tri2);
 	OVec3 setIllumination(OVec3 FragPos, OVec3 Normal);
@@ -158,6 +152,7 @@ private:
 	float m_time=100;
 	float fTheta;
 
+    OVec3 pos=OVec3(0,-5,25.0f);
 };
 
 

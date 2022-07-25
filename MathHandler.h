@@ -4,7 +4,7 @@
 #include <memory>
 
 #include "Point.h"
-
+#include <cmath>
 
 class ORect
 {
@@ -129,12 +129,29 @@ public:
 	}
 	void color_limit()
 	{
-	    if(m_x<0.01)m_x=0;
-	    if(m_y<0.01)m_y=0;
-	    if(m_z<0.01)m_z=0;
-	    if(m_x>255)m_x*=(255/10000.0f);
-	    if(m_y>255)m_y*=255/100000.0f;
-	    if(m_z>255)m_z*=255/100000.0f;
+	    if(m_x<0.01)
+        {
+            m_x=255*m_x;
+
+        }
+	    if(m_y<0.01)m_y*=255;
+	    if(m_z<0.01)m_z*=255;
+	    if(m_x>255)
+        {
+            m_x=m_x-255/m_x;
+
+        }
+        if(m_y>255)
+        {
+            m_y=m_y-255/m_y;
+
+        }
+        if(m_z>255)
+        {
+            m_z=m_z-255/m_z;
+
+        }
+
 
 
 	}

@@ -1,49 +1,58 @@
 #include "Engine.h"
+#include "IOHandler.h"
 
-//#include "IOHandler.h"
+std::atomic<bool> Engine::m_bAtomActive(false);
+std::condition_variable Engine::m_cvGameFinished;
+std::mutex Engine::m_muxGame;
 
-
-std::atomic<bool> IOHandler::m_bAtomActive(false);
-std::condition_variable IOHandler::m_cvGameFinished;
-std::mutex IOHandler::m_muxGame;
-
-IOHandler::IOHandler()
+Engine::Engine()
 {
 	m_nScreenWidth = 100;
 	m_nScreenHeight = 80;
 
+    InputSystem::create();
 
 }
 
 
-int IOHandler::ConstructConsole(int width, int height)
+int Engine::ConstructConsole(int width, int height)
 {
 
-	m_nScreenWidth = width;
-	m_nScreenHeight = height;
-    initwindow(600, 600);
+	m_nScreenHeight = 800;
+	m_nScreenWidth = 1200;
+    initwindow(m_nScreenWidth, m_nScreenHeight);
+    InputSystem::get()->addListener(this);
 
 	return 1;
 }
 
-void IOHandler::Draw(int x, int y, OVec3 col)
+void Engine::Draw(int x, int y, OVec3 col)
 {
 	if (x >= 0 && x < m_nScreenWidth && y >= 0 && y < m_nScreenHeight)
 	{
-		putpixel(x,y+250,COLOR(int(col.m_x),int(col.m_y),int(col.m_z)));
+		putpixel(x,y,COLOR(int(col.m_x),int(col.m_y),int(col.m_z)));
+
 	}
 }
 
-void IOHandler::Fill(int x1, int y1, int x2, int y2, OVec3 col)
+void Engine::Fill(int x1, int y1, int x2, int y2, OVec3 col)
 {
 	Clip(x1, y1);
 	Clip(x2, y2);
+    clearviewport();
+    //cleardevice();
+
+    /*
+    setbkcolor(RED);
 	for (int x = x1; x < x2; x++)
 		for (int y = y1; y < y2; y++)
-			Draw(x, y,col);
+			Draw(x, y,col));
+
+       */
 }
 
-void IOHandler::Clip(int& x, int& y)
+
+void Engine::Clip(int& x, int& y)
 {
 
 	if (x < 0) x = 0;
@@ -52,7 +61,7 @@ void IOHandler::Clip(int& x, int& y)
 	if (y >= m_nScreenHeight) y = m_nScreenHeight;
 }
 
-void IOHandler::DrawLine(int x1, int y1, int x2, int y2, OVec3 col)
+void Engine::DrawLine(int x1, int y1, int x2, int y2, OVec3 col)
 {
 	int x, y, dx, dy, dx1, dy1, px, py, xe, ye, i;
 	dx = x2 - x1; dy = y2 - y1;
@@ -113,14 +122,14 @@ void IOHandler::DrawLine(int x1, int y1, int x2, int y2, OVec3 col)
 
 }
 
-void IOHandler::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col)
+void Engine::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col)
 {
 	DrawLine(x1, y1, x2, y2,  col);
 	DrawLine(x2, y2, x3, y3,  col);
 	DrawLine(x3, y3, x1, y1,  col);
 }
 
-void IOHandler::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col)
+void Engine::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col)
 {
 
 	auto SWAP = [](int& x, int& y) { int t = x; x = y; y = t; };
@@ -261,7 +270,7 @@ next:
 }
 
 
-void IOHandler::DrawWireFrameModel(const std::vector<std::pair<float, float>>& vecModelCoordinates, float x, float y, float r, float s, OVec3 col)
+void Engine::DrawWireFrameModel(const std::vector<std::pair<float, float>>& vecModelCoordinates, float x, float y, float r, float s, OVec3 col)
 {
 	// Create translated model vector of coordinate pairs
 	std::vector<std::pair<float, float>> vecTransformedCoordinates;
@@ -299,31 +308,36 @@ void IOHandler::DrawWireFrameModel(const std::vector<std::pair<float, float>>& v
 
 }
 
-IOHandler::~IOHandler()
+Engine::~Engine()
 {
 	closegraph();
 	//delete[] m_bufScreen;
 }
 
-void IOHandler::Start()
+void Engine::Start()
 {
 
 	// Start the thread
 	m_bAtomActive = true;
-    GameThread();
+    std::thread t = std::thread(&Engine::GameThread, this);
+
+	// Wait for thread to be exited
+	t.join();
+    //GameThread();
+
 }
 
-int IOHandler::ScreenWidth()
+int Engine::ScreenWidth()
 {
 	return m_nScreenWidth;
 }
 
-int IOHandler::ScreenHeight()
+int Engine::ScreenHeight()
 {
 	return m_nScreenHeight;
 }
 
-void IOHandler::GameThread()
+void Engine::GameThread()
 {
 	// Create user resources as part of this thread
 	if (!OnUserCreate())
@@ -344,7 +358,7 @@ void IOHandler::GameThread()
 			tp1 = tp2;
 			float fElapsedTime = elapsedTime.count();
 
-
+            InputSystem::get()->update();
 
 			// Handle Frame Update
 			if (!OnUserUpdate(fElapsedTime))
@@ -366,4 +380,52 @@ void IOHandler::GameThread()
 	}
 
 }
+
+
+void Engine::onKeyDown(int key)
+{
+
+}
+
+void Engine::onKeyUp(int key)
+{}
+
+void Engine::onMouseMove(const Point& mouse_pos)
+{
+	//if (!m_play_state) return;
+
+    /*
+
+
+	int width = ScreenWidth();
+    int height = ScreenHeight();
+
+	float x_off = (mouse_pos.m_x - (width / 2.0f));
+	float y_off = (mouse_pos.m_y - (height / 2.0f));
+
+    */
+
+	//InputSystem::get()->setCursorPosition(Point((int)(width / 2.0f), (int)(height / 2.0f)));
+}
+
+void Engine::onLeftMouseDown(const Point& mouse_pos)
+{
+
+}
+
+void Engine::onLeftMouseUp(const Point& mouse_pos)
+{
+
+}
+
+void Engine::onRightMouseDown(const Point& mouse_pos)
+{
+
+}
+
+void Engine::onRightMouseUp(const Point& mouse_pos)
+{
+
+}
+
 

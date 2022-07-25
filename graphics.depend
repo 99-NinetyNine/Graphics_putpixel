@@ -1,8 +1,9 @@
 # depslib dependency file v1.0
-1658681493 source:d:\5th sem\graph\graphics\src\engine.cpp
+1658775539 source:d:\5th sem\graph\graphics\src\engine.cpp
 	"Engine.h"
+	"IOHandler.h"
 
-1658681442 d:\5th sem\graph\graphics\include\engine.h
+1658769960 d:\5th sem\graph\graphics\include\engine.h
 	<windows.h>
 	<stdio.h>
 	<stdlib.h>
@@ -16,6 +17,7 @@
 	<condition_variable>
 	"graphics.h"
 	"../MathHandler.h"
+	"../InputListener.h"
 
 1658594242 source:d:\5th sem\graph\graphics\src\iohandler.cpp
 	"IOHandler.h"
@@ -32,26 +34,26 @@
 
 1658591494 d:\5th sem\graph\graphics\point.h
 
-1658681790 source:d:\5th sem\graph\graphics\src\project.cpp
+1658776100 source:d:\5th sem\graph\graphics\src\project.cpp
 	"Project.h"
 	<algorithm>
 	<fstream>
 	<strstream>
 	"IOHandler.h"
 
-1658681090 d:\5th sem\graph\graphics\include\project.h
-	"Engine.h"
+1658774812 d:\5th sem\graph\graphics\include\project.h
 	<iostream>
 	<vector>
 	<fstream>
 	<strstream>
 	"graphics.h"
+	"Engine.h"
 	"../MathHandler.h"
 	"../Point.h"
-	"../InputListener.h"
 
-1658682029 d:\5th sem\graph\graphics\mathhandler.h
+1658776535 d:\5th sem\graph\graphics\mathhandler.h
 	<vector>
 	<memory>
 	"Point.h"
+	<cmath>
 

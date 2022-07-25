@@ -1,0 +1,10 @@
+bin/Debug/graphics.exe
+obj/Debug/src/Project.o
+obj/Debug/src/Engine.o
+
+
+*.exe
+*.obj
+*.lib
+*.bin
+*.o

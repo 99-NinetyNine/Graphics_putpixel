@@ -5,20 +5,16 @@
 #include <strstream>
 #include "IOHandler.h"
 
-OVec3 CalcDirLight(Engine::DirLight light, OVec3 normal, OVec3 viewDir);
-OVec3 CalcPointLight(Engine::PointLight light, OVec3 normal, OVec3 fragPos, OVec3 viewDir);
-OVec3 CalcSpotLight(Engine::SpotLight light, OVec3 normal, OVec3 fragPos, OVec3 viewDir);
+OVec3 CalcDirLight(Project::DirLight light, OVec3 normal, OVec3 viewDir);
+OVec3 CalcPointLight(Project::PointLight light, OVec3 normal, OVec3 fragPos, OVec3 viewDir);
+OVec3 CalcSpotLight(Project::SpotLight light, OVec3 normal, OVec3 fragPos, OVec3 viewDir);
 
 
-Engine::Engine()
+Project::Project()
+{}
+
+bool Project::OnUserCreate()
 {
-	//m_sAppName = L"hello";
-	InputSystem::create();
-}
-
-bool Engine::OnUserCreate()
-{
-	InputSystem::get()->addListener(this);
 
 	pointLightPositions[0] = OVec3(2.0f, 3.0f, -4.0f);
 	pointLightPositions[1]=OVec3(2.0f,3.0f,-4.0f),
@@ -47,26 +43,32 @@ bool Engine::OnUserCreate()
 	return true;
 }
 
-bool Engine::OnUserUpdate(float fElapsedTime)
+bool Project::OnUserUpdate(float fElapsedTime)
 {
-	InputSystem::get()->update();
 
-
-
-	vForward = vLookDir * 8.0f * fElapsedTime;
     m_deltaTime=fElapsedTime;
     m_time+=m_deltaTime+20;
 
+    fflush(stdin);
+
+    if(kbhit())
+    {
+            onKeyDown(getch());
+    }
+
     // Clear Screen
-	Fill(0, 0, ScreenWidth(), ScreenHeight(),0);
-	//setcolor(BLACK);
-    //circle(100,100,50);
+	Fill(0, 0, ScreenWidth(), ScreenHeight(),OVec3(9,5,5));
 
-	// Create "Point At" Matrix for camera
 
+    // Create "Point At" Matrix for camera
+	vUp=OVec3(0, 1, 0);
+    vTarget=OVec3(0, 0, 1);
 
 	OMat4 matCameraRot;
 	matCameraRot.setRotationY(fYaw);
+
+	vForward = vLookDir * 8.0f * fElapsedTime;
+
 	vLookDir = matCameraRot * vTarget;
 	vTarget = vCamera + vLookDir;
 	viewPos = vTarget;
@@ -79,18 +81,19 @@ bool Engine::OnUserUpdate(float fElapsedTime)
 
 
 	fTheta += fElapsedTime;
-	setTRS(OVec3(0.0f, 0.0f, 5.0f), OVec3(m_deltaTime*10,m_deltaTime*5,m_deltaTime*2.0f), OVec3(1));
+	setTRS(pos, OVec3(0), OVec3(0.091));
+	//setTRS(OVec3(10.0f, -8.0f, 3.0f), OVec3(0), OVec3(1));
 	drawModel(meshRocket);
 
 
-	setTRS(OVec3(25.0f, -20.0f, 20.0f), OVec3(0), OVec3(0.3));
+	setTRS(OVec3(30.0f, -8.0f, 20.0f), OVec3(0), OVec3(0.07));
 	drawModel(meshAxes);
 
 
 	return true;
 }
 
-void Engine::drawModel(mesh& model)
+void Project::drawModel(mesh& model)
 {
 	// Draw Triangles
 	vector<triangle> vecTrianglesToRaster;
@@ -132,10 +135,11 @@ void Engine::drawModel(mesh& model)
 			//OVec3 dp3 = setIllumination(triTransformed.p[2], normal);
 			OVec3 dp=setIllumination(centroid, normal);
 			OVec3 light(255,255,255);
+			dp.color_limit();
 			dp *=light;
 			dp.color_limit();
 
-            triProjected.col = OVec3(255);
+            triProjected.col = dp;//OVec3(255);
 
 			// Project triangles from 3D --> 2D
 			triViewed.p[0] = matView * triTransformed.p[0];
@@ -215,15 +219,19 @@ void Engine::drawModel(mesh& model)
 }
 
 
-void Engine::setTRS(OVec3 tranlate, OVec3 rotate, OVec3 scale)
+void Project::setTRS(OVec3 tranlate, OVec3 rotate, OVec3 scale)
 {
 	matWorld.setIdentity();
 	//rotate = rotate * (3.14 / 180.0);
 
     OMat4 temp;
-    temp.setIdentity();
-	temp.setScale(scale);
+
+
+   	temp.setIdentity();
+	temp.setTranslation(tranlate);
 	matWorld *= temp;
+
+
 
 	temp.setIdentity();
 	temp.setRotationX(rotate.m_x);
@@ -237,16 +245,15 @@ void Engine::setTRS(OVec3 tranlate, OVec3 rotate, OVec3 scale)
 	temp.setRotationZ(rotate.m_z);
 	matWorld *= temp;
 
-
-
-   	temp.setIdentity();
-	temp.setTranslation(tranlate);
+    temp.setIdentity();
+	temp.setScale(scale);
 	matWorld *= temp;
+
 
 
 }
 
-OVec3 Engine::setIllumination(OVec3 FragPos,OVec3 Normal)
+OVec3 Project::setIllumination(OVec3 FragPos,OVec3 Normal)
 {
 
 	PointLight pointLights[4];
@@ -285,7 +292,7 @@ OVec3 Engine::setIllumination(OVec3 FragPos,OVec3 Normal)
 }
 
 
-OVec3 CalcDirLight(Engine::DirLight light, OVec3 normal, OVec3 viewDir)
+OVec3 CalcDirLight(Project::DirLight light, OVec3 normal, OVec3 viewDir)
 {
 	OVec3 lightDir = OVec3::normalize(light.direction);
 	lightDir = lightDir * -1;
@@ -303,7 +310,7 @@ OVec3 CalcDirLight(Engine::DirLight light, OVec3 normal, OVec3 viewDir)
 }
 
 	// calculates the color when using a point light.
-OVec3 CalcPointLight(Engine::PointLight light, OVec3 normal, OVec3 fragPos, OVec3 viewDir)
+OVec3 CalcPointLight(Project::PointLight light, OVec3 normal, OVec3 fragPos, OVec3 viewDir)
 {
 	OVec3 lightDir = OVec3::normalize(light.position - fragPos);
 	// diffuse shading
@@ -324,7 +331,7 @@ OVec3 CalcPointLight(Engine::PointLight light, OVec3 normal, OVec3 fragPos, OVec
 	return (ambient + diffuse + specular);
 }
 	// calculates the color when using a spot light.
-OVec3 CalcSpotLight(Engine::SpotLight light, OVec3 normal, OVec3 fragPos, OVec3 viewDir)
+OVec3 CalcSpotLight(Project::SpotLight light, OVec3 normal, OVec3 fragPos, OVec3 viewDir)
 {
 	OVec3 lightDir = OVec3::normalize(light.position - fragPos);
 	// diffuse shading
@@ -348,10 +355,10 @@ OVec3 CalcSpotLight(Engine::SpotLight light, OVec3 normal, OVec3 fragPos, OVec3 
 	specular *= attenuation * intensity;
 	return (ambient + diffuse + specular);
 
-};
+}
 
 
-int Engine::Triangle_ClipAgainstPlane(OVec3 plane_p, OVec3 plane_n, triangle& in_tri, triangle& out_tri1, triangle& out_tri2)
+int Project::Triangle_ClipAgainstPlane(OVec3 plane_p, OVec3 plane_n, triangle& in_tri, triangle& out_tri1, triangle& out_tri2)
 {
 	// Make sure plane normal is indeed normal
 	plane_n = OVec3::normalize(plane_n);
@@ -450,109 +457,75 @@ int Engine::Triangle_ClipAgainstPlane(OVec3 plane_p, OVec3 plane_n, triangle& in
 
 		return 2; // Return two newly formed triangles which form a quad
 	}
+
+    return 0;
 }
 
-void Engine::onKeyDown(int key)
+
+void Project::onKeyDown(int key)
+
 {
-//	if (!m_play_state) return;
-
-	if (key=VK_UP)
+    cout<<key<<"\t";
+    if (key==72)
     {
-		vCamera.m_y += 8.0f * m_deltaTime;	// Travel Upwards
+		pos.m_y+=2.0f;
 
     }
 
-	if (key=VK_DOWN)
+	else if (key==80)
     {
-
-		vCamera.m_y -= 8.0f * m_deltaTime;	// Travel Downwards
+        pos.m_y-=2.0f;
+		//vCamera.m_y -= 8.0f * m_deltaTime;	// Travel Downwards
     }
 
 
-	if (key=VK_LEFT)
+	else if (key==75)
     {
+
 
 		vCamera.m_x -= 8.0f * m_deltaTime;	// Travel Along X-Axis
     }
 
-	if (key=VK_RIGHT)
+	else if (key==77)
     {
 
 		vCamera.m_x += 8.0f * m_deltaTime;	// Travel Along X-Axis
     }
 	///////
 
-	if (key == 'W'){
 
-		vCamera = vCamera + vForward;
+	else if (key == 'w'){
+
+		pos.m_z-=2.0f;
 	}
 
-	if (key == 'S')
+	else if (key == 's')
     {
-
-		vCamera = vCamera - vForward;
+		pos.m_z+=2.0f;
 
     }
 
-	if (key == 'A')
+	else if (key == 'a')
     {
 
-		fYaw -= 2.0f * m_deltaTime;
+		pos.m_x+=2.0f;
 
     }
 
-	if (key == 'D')
+	else if (key == 'd')
 
     {
-		std::cout<<"hi";
-		fYaw += 2.0f * m_deltaTime;
+		pos.m_x-=2.0f;
+
 
     }
 
 }
 
-void Engine::onKeyUp(int key)
-{}
-
-void Engine::onMouseMove(const Point& mouse_pos)
-{
-	//if (!m_play_state) return;
-
-
-	int width = ScreenWidth();
-    int height = ScreenHeight();
-
-	float x_off = (mouse_pos.m_x - (width / 2.0f));
-	float y_off = (mouse_pos.m_y - (height / 2.0f));
-
-	//m_camera->ProcessMouseMovement(x_off, y_off);
-
-	//InputSystem::get()->setCursorPosition(Point((int)(width / 2.0f), (int)(height / 2.0f)));
-}
-
-void Engine::onLeftMouseDown(const Point& mouse_pos)
-{
-
-}
-
-void Engine::onLeftMouseUp(const Point& mouse_pos)
-{
-
-}
-
-void Engine::onRightMouseDown(const Point& mouse_pos)
-{
-
-}
-
-void Engine::onRightMouseUp(const Point& mouse_pos)
-{
-
-}
 
 int main()
 {
-    Engine e;
+    Project e;
     if(e.ConstructConsole(300,300))
     {
         e.Start();
