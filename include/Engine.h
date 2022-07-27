@@ -31,6 +31,7 @@ public:
 	void DrawLine(int x1, int y1, int x2, int y2, OVec3 col);
 	void DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col);
 	void FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col=OVec3(colors(4)));
+	void FloodFillTriangles(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col);
 	void DrawWireFrameModel(const std::vector<std::pair<float, float>>& vecModelCoordinates, float x, float y, float r = 0.0f, float s = 1.0f, OVec3 col = 255);
 
 	~Engine();

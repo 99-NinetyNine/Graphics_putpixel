@@ -129,6 +129,20 @@ void Engine::DrawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 
 	DrawLine(x3, y3, x1, y1,  col);
 }
 
+void Engine::FloodFillTriangles(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col)
+{
+
+int color=COLOR(int(col.m_x),int(col.m_y),int(col.m_z));
+setfillstyle(SOLID_FILL,color);
+int poly[]={
+x1,y1,
+x2,y2,
+x3,y3
+};
+fillpoly(3,poly);
+
+}
+
 void Engine::FillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, OVec3 col)
 {
 

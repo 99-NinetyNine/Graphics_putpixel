@@ -168,18 +168,12 @@ public:
 		return (sqrtf(res));
 	}
 
-	static OVec3 reflect(const OVec3& ray, const  OVec3& normal)
+	static OVec3 reflect(OVec3 I, OVec3 N)
 	{
-		OVec3 ray_new = ray;
-		ray_new=ray_new * -1;
-		float dot1 = dot(ray_new, normal);
-		OVec3 res;
-		res.m_x = dot1 / normal.m_x;
-		res.m_y = dot1 / normal.m_y;
-		res.m_z = dot1 / normal.m_z;
 
+	    I =I- N*2 * dot(I, N);
+	    return I;
 
-		return res;
 	}
 	static float clamp(float a, float b , float c)
 	{
@@ -307,6 +301,7 @@ public:
 	{
 		setIdentity();
 	}
+
 	static OMat4 make_mat4(std::vector<float>& m)
 	{
 		OMat4 res;

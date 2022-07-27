@@ -16,11 +16,21 @@ Project::Project()
 bool Project::OnUserCreate()
 {
 
-	pointLightPositions[0] = OVec3(2.0f, 3.0f, -4.0f);
-	pointLightPositions[1]=OVec3(2.0f,3.0f,-4.0f),
-	pointLightPositions[2]=OVec3(-2.0f,3.0f,4.0f),
-	pointLightPositions[3]=OVec3(2.0f,-3.0f,4.0f),
+	pointLightPositions[0] = OVec3(.0f, .0f, 6.0f);
+	pointLightPositions[1]=OVec3(0,0,5);
+	pointLightPositions[2]=OVec3(.0f,.0f,.4f);
+	pointLightPositions[3]=OVec3(.0f,.0f,.3f);
 
+	for (int i = 0;i < 4;i++)
+	{
+		m_PointLights[i].position = pointLightPositions[i];//pointLightPositions
+		m_PointLights[i].ambient = OVec3(0.05f, 0.05f, 0.05f);
+		m_PointLights[i].diffuse = OVec3(0.8f, 0.8f, 0.8f);
+		m_PointLights[i].specular = OVec3(1.0f, 1.0f, 1.0f);
+		m_PointLights[i].constant = 1.0f;
+		m_PointLights[i].linear = 0.5;
+		m_PointLights[i].quadratic = 0.032f;
+	}
 	meshRocket.LoadFromObjectFile("rocket.obj");
 	meshAxes.LoadFromObjectFile("model.txt");
 
@@ -80,6 +90,7 @@ bool Project::OnUserUpdate(float fElapsedTime)
 	matView = matCamera;
 
 
+
 	fTheta += fElapsedTime;
 	setTRS(pos, OVec3(0), OVec3(0.091));
 	//setTRS(OVec3(10.0f, -8.0f, 3.0f), OVec3(0), OVec3(1));
@@ -87,7 +98,7 @@ bool Project::OnUserUpdate(float fElapsedTime)
 
 
 	setTRS(OVec3(30.0f, -8.0f, 20.0f), OVec3(0), OVec3(0.07));
-	drawModel(meshAxes);
+	//drawModel(meshAxes);
 
 
 	return true;
@@ -206,10 +217,17 @@ void Project::drawModel(mesh& model)
 	for (auto& triProjected : vecTrianglesToRaster)
 	{
 		// Rasterize triangle
+		FloodFillTriangles(triProjected.p[0].m_x, triProjected.p[0].m_y,
+			triProjected.p[1].m_x, triProjected.p[1].m_y,
+			triProjected.p[2].m_x, triProjected.p[2].m_y,
+			triProjected.col);
+		/*
 		FillTriangle(triProjected.p[0].m_x, triProjected.p[0].m_y,
 			triProjected.p[1].m_x, triProjected.p[1].m_y,
 			triProjected.p[2].m_x, triProjected.p[2].m_y,
 			triProjected.col);
+
+			*/
 
 		DrawTriangle(triProjected.p[0].m_x, triProjected.p[0].m_y,
 			triProjected.p[1].m_x, triProjected.p[1].m_y,
@@ -256,39 +274,22 @@ void Project::setTRS(OVec3 tranlate, OVec3 rotate, OVec3 scale)
 OVec3 Project::setIllumination(OVec3 FragPos,OVec3 Normal)
 {
 
-	PointLight pointLights[4];
-	for (int i = 0;i < 4;i++)
-	{
-		pointLights[i].position = pointLightPositions[i];//pointLightPositions
-		pointLights[i].ambient = OVec3(0.05f, 0.05f, 0.05f);
-		pointLights[i].diffuse = OVec3(0.8f, 0.8f, 0.8f);
-		pointLights[i].specular = OVec3(1.0f, 1.0f, 1.0f);
-		pointLights[i].constant = 1.0f;
-		pointLights[i].linear = 0.5;
-		pointLights[i].quadratic = 0.032f;
-	}
-
-
-
-	DirLight dirLight;
-	SpotLight spotLight;
-
-
-	// properties
+    // properties
 	OVec3 norm = OVec3::normalize(Normal);
 	OVec3 viewDir = OVec3::normalize(viewPos - FragPos);
 
 	// directional lighting
-	OVec3 result = CalcDirLight(dirLight, norm, viewDir);
+	OVec3 result = CalcDirLight(m_DirLight, norm, viewDir);
 	//  point lights
 	for (int i = 0; i < 4; i++)
 	{
-		result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
+		//result += CalcPointLight(m_PointLights[i], norm, FragPos, viewDir);
 	}
 	result += CalcSpotLight(spotLight, norm, FragPos, viewDir);
 
 
-	return result;//((result.m_x + result.m_y + result.m_z)/3.0f);
+	return result;
+
 }
 
 
@@ -297,10 +298,10 @@ OVec3 CalcDirLight(Project::DirLight light, OVec3 normal, OVec3 viewDir)
 	OVec3 lightDir = OVec3::normalize(light.direction);
 	lightDir = lightDir * -1;
 	// diffuse shading
-	float diff = max_calc(OVec3::dot(normal, lightDir), 0.0);
+	float diff = max_calc(OVec3::dot(normal, lightDir), 0.01);
 	// specular shading
-	OVec3 reflectDir = OVec3::reflect(lightDir*-1, normal);
-	float spec = pow(max_calc(OVec3::dot(viewDir, reflectDir), 0.0), 2.0);
+	OVec3 reflectDir = OVec3::reflect(lightDir, normal);
+	float spec = pow(max_calc(OVec3::dot(viewDir, reflectDir), 0.1), 32.0);
 	// combine results
 	OVec3 ambient = light.ambient;
 	OVec3 diffuse = light.diffuse * diff;
@@ -323,11 +324,11 @@ OVec3 CalcPointLight(Project::PointLight light, OVec3 normal, OVec3 fragPos, OVe
 	float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
 	// combine results
 	OVec3 ambient = light.ambient;
-	OVec3 diffuse = light.diffuse;
+	OVec3 diffuse = light.diffuse*diff;
 	OVec3 specular = light.specular*spec;
-	ambient *= attenuation;
-	diffuse *= attenuation;
-	specular *= attenuation;
+	//ambient *= attenuation;
+	//diffuse *= attenuation;
+	//specular *= attenuation;
 	return (ambient + diffuse + specular);
 }
 	// calculates the color when using a spot light.
@@ -337,7 +338,7 @@ OVec3 CalcSpotLight(Project::SpotLight light, OVec3 normal, OVec3 fragPos, OVec3
 	// diffuse shading
 	float diff = max_calc(OVec3::dot(normal, lightDir), 0.0);
 	// specular shading
-	OVec3 reflectDir = OVec3::reflect(lightDir*-1, normal);
+	OVec3 reflectDir = OVec3::reflect(lightDir, normal);
 	float spec = pow(max_calc(OVec3::dot(viewDir, reflectDir), 0.0), 2.0f);
 	// attenuation
 	float distance = OVec3::length(light.position - fragPos);
@@ -347,6 +348,7 @@ OVec3 CalcSpotLight(Project::SpotLight light, OVec3 normal, OVec3 fragPos, OVec3
 	float epsilon = light.cutOff - light.outerCutOff;
 	float intensity = OVec3::clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 	// combine results
+	attenuation=1;
 	OVec3 ambient = light.ambient;
 	OVec3 diffuse = light.diffuse * diff;
 	OVec3 specular = light.specular * spec;
@@ -483,13 +485,13 @@ void Project::onKeyDown(int key)
     {
 
 
-		vCamera.m_x -= 8.0f * m_deltaTime;	// Travel Along X-Axis
+		vCamera.m_x -= 8.0f ;	// Travel Along X-Axis
     }
 
 	else if (key==77)
     {
 
-		vCamera.m_x += 8.0f * m_deltaTime;	// Travel Along X-Axis
+		vCamera.m_x += 8.0f ;	// Travel Along X-Axis
     }
 	///////
 

@@ -76,11 +76,11 @@ public:
 public:
 
 	struct DirLight {
-		OVec3 direction = OVec3(-0.2f, 1.0f, 0.3f);
+        OVec3 direction = OVec3(0.0f, 0.0f, 1.0f);
 		OVec3 ambient = OVec3(0.05f, 0.05f, 0.05f);
 		OVec3 diffuse = OVec3(0.8f, 0.8f,0.8f);;
 		OVec3 specular = OVec3(.5f, .5f, .5f);;
-	};
+	}m_DirLight;
 
 	struct PointLight {
 		OVec3 position=OVec3();
@@ -96,7 +96,7 @@ public:
 
 
 	struct SpotLight {
-		OVec3 position = OVec3(0.0f, 0, 0);
+		OVec3 position = OVec3(3.0f, 0, 0);
 		OVec3 direction = OVec3(0, 0, -2.0f);
 		float cutOff = cos(radians(2.5f));
 		float outerCutOff = cos(radians(5.0f));
@@ -108,8 +108,10 @@ public:
 		OVec3 ambient = OVec3(1.0f, 1.0f, 1.0f);
 		OVec3 diffuse = OVec3(1.0f, 1.0f, 1.0f);
 		OVec3 specular = OVec3(1.0f, 1.0f, 1.0f);
-	};
+	}
+    spotLight;
 
+    PointLight m_PointLights[4];
 public:
 	bool OnUserCreate() override;
 	bool OnUserUpdate(float fElapsedTime)override;

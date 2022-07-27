@@ -2,9 +2,11 @@ bin/Debug/graphics.exe
 obj/Debug/src/Project.o
 obj/Debug/src/Engine.o
 
+*.[oa]
 
 *.exe
 *.obj
+
 *.lib
 *.bin
 *.o
