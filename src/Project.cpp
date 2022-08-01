@@ -50,7 +50,7 @@ bool Project::OnUserCreate()
 	matProj.m_mat[3][3] = 0.0f;
 
 
-	return true;
+	return (OnUserUpdate(0));
 }
 
 bool Project::OnUserUpdate(float fElapsedTime)

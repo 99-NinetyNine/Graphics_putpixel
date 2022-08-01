@@ -375,8 +375,12 @@ void Engine::GameThread()
             InputSystem::get()->update();
 
 			// Handle Frame Update
+			if(kbhit())
+            {
+
 			if (!OnUserUpdate(fElapsedTime))
 				m_bAtomActive = false;
+            }
 
 		}
 
